@@ -29,3 +29,4 @@ public class Auto {
 		return tipos;
 	}
 }
+

@@ -7,6 +7,13 @@ from bidon import Bidon
 
 
 def cargar_desde_csv(archivo: str, carga: Type[Any], camion: Camion) -> None:
+    """Carga los objetos de un archivo CSV en un camión.
+
+    Args:
+        archivo (str): Archivo en csv a leer
+        carga (Type[Any]): Tipo de carga a crear, entre Caja, Packing y Bidon.
+        camion (Camion): Camión al que se le cargarán las cargas.
+    """
     with open(archivo, "rt") as file:
         file.readline()  # Descarta la primera línea
         for line in file:

@@ -1,44 +1,63 @@
+from typing import Any, Type
+import random
 from camion import Camion
-from packing import Packing
 from caja import Caja
+from packing import Packing
 from bidon import Bidon
 
-def main():
-    # Crear un camión con una carga máxima de 1000 kg
-    mi_camion = Camion("ABC-123", 100)
-    print(f"Información del camión: {mi_camion}")
 
-    # Crear algunas cargas y packings
-    todas_las_cargas = [
-        Packing("Material de construcción", 20, 1, 10),
-        Packing("Material de construcción", 10, 1, 10),
-        Caja("Material de herrería", 20),
-        Bidon("Bidon de agua", 20, 1)
-    ]
+def cargar_desde_csv(archivo: str, carga: Type[Any], camion: Camion) -> None:
+    with open(archivo, "rt") as file:
+        file.readline()  # Descarta la primera línea
+        for line in file:
+            if random.choice([True, False]):
+                fields = line.strip().split(",")
+                first_field = fields[0]
+                remaining_fields = [float(x) for x in fields[1:]]  # Convertir a float
 
-    # Subir las cargas al camión y mostrar información
-    for carga in todas_las_cargas:
-        mi_camion.subir_carga(carga)
-        print(f"Subida la carga: {carga}")
+                item = carga(first_field, *remaining_fields)  # Crear objeto
+                try:
+                    camion.subir_carga(item)
+                except ValueError as e:
+                    available_weight = camion.carga_maxima - camion.peso_cargas
+                    print(
+                        f"No se pudo cargar {item}. Supera el peso máximo. Disponible: {available_weight:.2f}"
+                    )
 
-    print(f"Cantidad de cargas en el camión: {mi_camion.cantidad_cargas()}")
-    print(f"Peso total de las cargas en el camión: {mi_camion.peso_cargas()} kg")
 
-    # Cambiar el estado del camión y comprobar si está listo para salir
-    mi_camion.a_reparacion()
-    print(f"Estado del camión: {mi_camion._estado}")
-    mi_camion.sale_reparado()
-    print(f"Estado del camión: {mi_camion._estado}")
+def main() -> None:
+    camion = Camion("KMS851", 180)
 
-    # Verificar si el camión está listo para salir
-    if mi_camion.listo_para_salir():
-        print("El camión está listo para salir.")
-    else:
-        print("El camión no está listo para salir.")    
+    # Test subir_carga y bajar_carga
+    caja_test = Caja("Electrónicos", 30)
+    camion.subir_carga(caja_test)
+    camion.bajar_carga(caja_test)
 
-    print("---"*20)
-    # Listar las cargas en orden de peso
-    print(f"Cargas en orden de peso: \n\n{mi_camion.cargas_en_orden()}")
+    # Test cambio de estado
+    camion.a_reparacion()
+    print(camion._estado)
+    camion.sale_reparado()
+    print(camion._estado)
+    camion.en_viaje()
+    print(camion._estado)
+    camion.de_regreso()
+    print(camion._estado)
+
+    # Test listo_para_salir
+    for archivo, carga in [
+        ("Cajas.csv", Caja),
+        ("Packing.csv", Packing),
+        ("Bidones.csv", Bidon),
+    ]:
+        cargar_desde_csv(archivo, carga, camion)
+
+    listo = (
+        "El camión está listo para salir."
+        if camion.listo_para_salir()
+        else "El camión no está listo para salir."
+    )
+    print(f"{camion}\n{listo}")
+
 
 if __name__ == "__main__":
     main()

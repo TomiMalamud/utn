@@ -12,17 +12,17 @@ class Packing(Carga):
     @property
     def peso_por_caja(self):
         return self._peso_por_caja
-    
+
     @property
     def cantidad(self):
         return self._cantidad
-    
+
     @property
     def peso_estructura(self):
         return self._peso_estructura
-    
+
     def peso(self):
         return self.cantidad * self.peso_por_caja + self.peso_estructura
 
     def __str__(self) -> str:
-        return f"{self.contenido} - {self.peso_por_caja} kg/caja - {self.cantidad} un. - {self.peso_estructura} kg/estructura"
+        return f"{super().__str__()} - {self.peso_por_caja} kg/caja - {self.cantidad} un. - {self.peso_estructura} kg/estructura"

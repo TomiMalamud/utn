@@ -1,55 +1,79 @@
 from carga import Carga
+from enum import Enum
+
+
+class EstadoCamion(Enum):
+    DISPONIBLE = "Disponible"
+    EN_REPARACION = "En reparación"
+    EN_VIAJE = "En viaje"
+
 
 class Camion:
-    def __init__(self, patente, carga_maxima) -> None:
+    def __init__(self, patente: str, carga_maxima: float) -> None:
         self._patente = patente
-        self._estado = "Disponible"
+        self._estado = EstadoCamion.DISPONIBLE
         self._carga_maxima = carga_maxima
         self._cargas = []
-    
-    def __str__(self) -> str:
-        return f"{self._patente} - {self._estado} - {self._carga_maxima} kg"
 
-    def cantidad_cargas(self):
+    @property
+    def carga_maxima(self) -> float:
+        return self._carga_maxima
+
+    def __str__(self) -> str:
+        return f"""{'='*40}
+PATENTE: {self._patente}, ESTADO: {self._estado.value}
+CARGA MÁXIMA: {self.carga_maxima}
+{'-'*40}
+CANTIDAD DE CARGAS: {self.cantidad_cargas()}, PESO DE CARGAS: {self.peso_cargas}
+{'-'*40}
+CARGAS:
+{self.cargas_en_orden()}
+{'='*40}"""
+
+    def cantidad_cargas(self) -> int:
         return len(self._cargas)
-    
-    def subir_carga(self, carga: Carga):
-        if self._estado == "Disponible":
-            if self._carga_maxima >= carga.peso() + self.peso_cargas():
+
+    def subir_carga(self, carga: Carga) -> None:
+        if self._estado == EstadoCamion.DISPONIBLE:
+            if self.peso_cargas + carga.peso() <= self._carga_maxima:
                 self._cargas.append(carga)
             else:
-                raise Exception("La carga excede la capacidad del camion")
+                raise ValueError("El peso supera la carga máxima")
         else:
-            raise Exception("El camion no esta disponible")
-    
-    def bajar_carga(self, carga: Carga):
-        if self._estado == "Disponible":
+            raise ValueError("El camión no está disponible")
+
+    def bajar_carga(self, carga: Carga) -> None:
+        if self._estado == EstadoCamion.DISPONIBLE:
             if carga in self._cargas:
                 self._cargas.remove(carga)
             else:
-                raise Exception("La carga no esta en el camion")
+                raise ValueError("La carga no está en el camión")
         else:
-            raise Exception("El camion no esta disponible")
+            raise ValueError("El camión no está disponible")
 
-    def peso_cargas(self):
+    @property
+    def peso_cargas(self) -> float:
         return sum(carga.peso() for carga in self._cargas)
 
-    def a_reparacion(self):
-        self._estado = "En reparación"
-        
-    def sale_reparado(self):
-        self._estado = "Disponible"
-        
-    def en_viaje(self):
-        self._estado = "En viaje"
-        
-    def de_regreso(self):
-        self._estado = "Disponible"
-    
-    def listo_para_salir(self):
-        if self._estado == "Disponible" and self.peso_cargas() >= 0.75 * self._carga_maxima:
-            return True
-        return False
-    
-    def cargas_en_orden(self):
-        return "\n".join(str(carga) for carga in sorted(self._cargas, key=lambda x: x.peso()))
+    def a_reparacion(self) -> None:
+        self._estado = EstadoCamion.EN_REPARACION
+
+    def sale_reparado(self) -> None:
+        self._estado = EstadoCamion.DISPONIBLE
+
+    def en_viaje(self) -> None:
+        self._estado = EstadoCamion.EN_VIAJE
+
+    def de_regreso(self) -> None:
+        self._estado = EstadoCamion.DISPONIBLE
+
+    def listo_para_salir(self) -> bool:
+        return (
+            self._estado == EstadoCamion.DISPONIBLE
+            and self.peso_cargas >= 0.75 * self._carga_maxima
+        )
+
+    def cargas_en_orden(self) -> str:
+        return "\n".join(
+            str(carga) for carga in sorted(self._cargas, key=lambda x: x.peso())
+        )

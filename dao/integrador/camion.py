@@ -21,21 +21,21 @@ class Camion:
 
     def __str__(self) -> str:
         return f"""{'='*40}
-PATENTE: {self._patente}, ESTADO: {self._estado.value}
-CARGA MÁXIMA: {self.carga_maxima}
-{'-'*40}
-CANTIDAD DE CARGAS: {self.cantidad_cargas()}, PESO DE CARGAS: {self.peso_cargas}
-{'-'*40}
-CARGAS:
-{self.cargas_en_orden()}
-{'='*40}"""
+        PATENTE: {self._patente}, ESTADO: {self._estado.value}
+        CARGA MÁXIMA: {self.carga_maxima}
+        {'-'*40}
+        CANTIDAD DE CARGAS: {self.cantidad_cargas()}, PESO DE CARGAS: {self.peso_cargas}
+        {'-'*40}
+        CARGAS:
+        {self.cargas_en_orden()}
+        {'='*40}"""
 
     def cantidad_cargas(self) -> int:
         return len(self._cargas)
 
     def subir_carga(self, carga: Carga) -> None:
         if self._estado == EstadoCamion.DISPONIBLE:
-            if self.peso_cargas + carga.peso() <= self._carga_maxima:
+            if self.peso_cargas() + carga.peso() <= self._carga_maxima:
                 self._cargas.append(carga)
             else:
                 raise ValueError("El peso supera la carga máxima")
@@ -51,7 +51,6 @@ CARGAS:
         else:
             raise ValueError("El camión no está disponible")
 
-    @property
     def peso_cargas(self) -> float:
         return sum(carga.peso() for carga in self._cargas)
 
@@ -70,7 +69,7 @@ CARGAS:
     def listo_para_salir(self) -> bool:
         return (
             self._estado == EstadoCamion.DISPONIBLE
-            and self.peso_cargas >= 0.75 * self._carga_maxima
+            and self.peso_cargas() >= 0.75 * self._carga_maxima
         )
 
     def cargas_en_orden(self) -> str:
